@@ -315,20 +315,8 @@ class ViT_interp_weights(nn.Module):
         self.patch_embedding.weight = nn.Parameter(new_weights) 
         self.patch_embedding.bias = nn.Parameter(bias)
         self.forward(torch.zeros(1,1,new_img_size[0], new_img_size[1]))
+        print("ALL clear!!")
 
-    @torch.no_grad()
-    def re_dim_matrix(self, new_img_size, new_emb_size):
-        emb_size = int(new_img_size[0] / new_emb_size[0])
-        x = np.arange(0, emb_size) / (emb_size - 1)
-        st1 = 1/(emb_size - 1)
-        st2 = 1/(576 - 1)
-        re_dim_matrix = np.zeros((576, emb_size))
-        for i in range(576):
-            re_dim_matrix[i,0] = 1 - 2*i/emb_size * (st2/st1)
-            for j in range(1,emb_size):
-                re_dim_matrix[i,j] = 2*i/emb_size / (emb_size - 1)* (st2/st1)
-        
-        return re_dim_matrix
         
     def forward(self, x):
         """Breaks image into patches, applies transformer, applies MLP head.
@@ -338,7 +326,12 @@ class ViT_interp_weights(nn.Module):
         """
         b, c, fh, fw = x.shape
         x = self.patch_embedding(x)  # b,d,gh,gw
-        x = x.flatten(2).transpose(1, 2)  # b,gh*gw,d
+        x = x.flatten(2)
+        
+        
+        if x.shape[2] != 576:
+            x = F.interpolate(x, [576], mode='linear', align_corners=True)
+        x = x.transpose(1, 2)  # b,gh*gw,d
         if hasattr(self, 'class_token'):
             x = torch.cat((self.class_token.expand(b, -1, -1), x), dim=1)  # b,gh*gw+1,d
         if hasattr(self, 'positional_embedding'): 
