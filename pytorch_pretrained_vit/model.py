@@ -285,7 +285,6 @@ class ViT_interp_weights(nn.Module):
     def interp_weigts(self, new_img_size ,new_emb_size, stride = False):
         patch_h = new_emb_size[0]
         patch_w = new_emb_size[1]
-        assert((patch_h > 1) == stride)
         em, c, fh, fw = self.patch_embedding.weight.shape
         if patch_h != 1:
             new_weights = torch.zeros(em, 1, patch_h, patch_w)

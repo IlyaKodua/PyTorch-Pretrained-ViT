@@ -8,7 +8,7 @@ model = ViT_interp_weights(model_name, pretrained=True)
 
 
 
-model.interp_weigts((577,128), (2,128), stride=True)
+model.interp_weigts((576,128), (16,8), stride=False)
 
 
 
