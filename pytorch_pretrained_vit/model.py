@@ -282,7 +282,7 @@ class ViT_interp_weights(nn.Module):
         nn.init.constant_(self.class_token, 0)
 
     @torch.no_grad()
-    def interp_weigts(self, new_img_size ,new_emb_size, stride = False):
+    def interp_weigts(self, new_img_size ,new_emb_size,n_classes,  stride = False):
         patch_h = new_emb_size[0]
         patch_w = new_emb_size[1]
         em, c, fh, fw = self.patch_embedding.weight.shape
@@ -317,7 +317,10 @@ class ViT_interp_weights(nn.Module):
             self.patch_embedding = nn.Conv2d(in_channels = 1, out_channels = em, kernel_size = (patch_h, patch_w), stride = (int(patch_h/2), patch_w))
         self.patch_embedding.weight = nn.Parameter(new_weights) 
         self.patch_embedding.bias = nn.Parameter(bias)
-        self.forward(torch.zeros(1,1,new_img_size[0], new_img_size[1]))
+
+        self.fc = nn.Sequential(self.fc,
+                    nn.Linear(21843, 50))
+        print(self.forward(torch.zeros(1,1,new_img_size[0], new_img_size[1])).shape)
         print("ALL clear!!")
 
         
