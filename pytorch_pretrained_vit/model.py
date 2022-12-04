@@ -282,9 +282,10 @@ class ViT_interp_weights(nn.Module):
         nn.init.constant_(self.class_token, 0)
 
     @torch.no_grad()
-    def interp_weigts(self, new_img_size ,new_emb_size):
+    def interp_weigts(self, new_img_size ,new_emb_size, stride = False):
         patch_h = new_emb_size[0]
         patch_w = new_emb_size[1]
+        assert(patch_h > 1 == stride)
         em, c, fh, fw = self.patch_embedding.weight.shape
         if patch_h != 1:
             new_weights = torch.zeros(em, 1, patch_h, patch_w)
@@ -311,7 +312,10 @@ class ViT_interp_weights(nn.Module):
                 new_weights[i,:,:,:] = torch.from_numpy(weight_h_w.T)
         
         bias = self.patch_embedding.bias.cpu().detach()
-        self.patch_embedding = nn.Conv2d(in_channels = 1, out_channels = em, kernel_size = (patch_h, patch_w), stride = (patch_h, patch_w))
+        if not stride:
+            self.patch_embedding = nn.Conv2d(in_channels = 1, out_channels = em, kernel_size = (patch_h, patch_w), stride = (patch_h, patch_w))
+        else:
+            self.patch_embedding = nn.Conv2d(in_channels = 1, out_channels = em, kernel_size = (patch_h, patch_w), stride = (int(patch_h/2), patch_w))
         self.patch_embedding.weight = nn.Parameter(new_weights) 
         self.patch_embedding.bias = nn.Parameter(bias)
         self.forward(torch.zeros(1,1,new_img_size[0], new_img_size[1]))
