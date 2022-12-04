@@ -329,8 +329,8 @@ class ViT_interp_weights(nn.Module):
         x = x.flatten(2)
         
         
-        if x.shape[2] != 576:
-            x = F.interpolate(x, [576], mode='linear', align_corners=True)
+        # if x.shape[2] != 576:
+        #     x = F.interpolate(x, [576], mode='linear', align_corners=True)
         x = x.transpose(1, 2)  # b,gh*gw,d
         if hasattr(self, 'class_token'):
             x = torch.cat((self.class_token.expand(b, -1, -1), x), dim=1)  # b,gh*gw+1,d
