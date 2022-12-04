@@ -297,8 +297,8 @@ class ViT_interp_weights(nn.Module):
                 x_new = (np.arange(0,patch_h)/(patch_h-1)).astype(np.float32)
                 y_new = (np.arange(0,patch_w)/(patch_w-1)).astype(np.float32)
 
-                weight_h_w = f(x_new, y_new)
-                new_weights[i,:,:,:] = torch.from_numpy(weight_h_w.T)
+                weight_h_w = f(y_new, x_new)
+                new_weights[i,:,:,:] = torch.from_numpy(weight_h_w)
         else:
             new_weights = torch.zeros(em, 1, patch_h, patch_w)
             for i in range(em):
